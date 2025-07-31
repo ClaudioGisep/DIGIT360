@@ -1,73 +1,77 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <title>Canvas Modell</title>
-  <style>
-    html, body {
-      margin: 0;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    canvas {
-      display: block;
-    }
-  </style>
-</head>
-<body>
-<canvas id="canvas"></canvas>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Canvas Viewer</title>
+    <style>
+      html, body {
+        margin: 0;
+        overflow: hidden;
+        background: #f8f8f8;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
 
-<script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
-  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
-  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
+    <script type="module">
+      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
+      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
 
-  const canvas = document.querySelector('#canvas');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+      const canvas = document.querySelector('#canvas');
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f0f0);
 
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf0f0f0);
+      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 2, 6);
 
-  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 2, 6);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
 
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(5, 10, 7);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+      // Licht
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(5, 10, 7.5);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  const loader = new GLTFLoader();
-  loader.load(
-    'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
-    function (gltf) {
-      scene.add(gltf.scene);
-    },
-    undefined,
-    function (error) {
-      console.error('Modell konnte nicht geladen werden:', error);
-    }
-  );
+      // Modell laden
+      const loader = new GLTFLoader();
+      loader.load(
+        'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
+        gltf => {
+          scene.add(gltf.scene);
+        },
+        undefined,
+        error => {
+          console.error('Fehler beim Laden des Modells:', error);
+        }
+      );
 
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+      // Animation
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
 
-  function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-  }
-  animate();
-</script>
-</body>
+      // Resizing
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
 </html>
+
 
 
 
