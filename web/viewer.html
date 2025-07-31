@@ -2,12 +2,12 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Interaktives Canvas-Modell</title>
+  <title>Canvas Modell</title>
   <style>
     html, body {
       margin: 0;
       overflow: hidden;
-      background: #f8f8f8;
+      background: #ffffff;
     }
     canvas {
       display: block;
@@ -23,15 +23,15 @@
   import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
 
   const canvas = document.querySelector('#canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf0f0f0);
 
-  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(0, 2, 6);
-
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -41,41 +41,17 @@
   scene.add(light);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  let customer;
   const loader = new GLTFLoader();
-  loader.load('https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb', gltf => {
-    const model = gltf.scene;
-    scene.add(model);
-    customer = model.getObjectByName('20250730_Customer');
-  });
-
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2();
-
-  window.addEventListener('pointermove', (event) => {
-    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(pointer, camera);
-    const intersects = raycaster.intersectObject(customer, true);
-
-    if (intersects.length > 0) {
-      customer.position.y = -0.2; // absenken
-      document.body.style.cursor = 'pointer';
-    } else if (customer) {
-      customer.position.y = 0; // zurücksetzen
-      document.body.style.cursor = 'default';
+  loader.load(
+    'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
+    function (gltf) {
+      scene.add(gltf.scene);
+    },
+    undefined,
+    function (error) {
+      console.error('Modell konnte nicht geladen werden:', error);
     }
-  });
-
-  window.addEventListener('click', () => {
-    raycaster.setFromCamera(pointer, camera);
-    const intersects = raycaster.intersectObject(customer, true);
-
-    if (intersects.length > 0) {
-      window.open('https://digit360.odoo.com/customer', '_blank');
-    }
-  });
+  );
 
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -92,6 +68,7 @@
 </script>
 </body>
 </html>
+
 
 
   animate();
