@@ -2,7 +2,7 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <title>Model Viewer Test</title>
+    <title>Test Canvas GLB</title>
     <style>
       html, body {
         margin: 0;
@@ -16,7 +16,6 @@
   </head>
   <body>
     <canvas id="canvas"></canvas>
-
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
       import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
@@ -35,74 +34,35 @@
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
 
-      const raycaster = new THREE.Raycaster();
-      const pointer = new THREE.Vector2();
-
-      let customerPart = null;
-      let originalY = null;
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(5, 10, 7.5);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
       const loader = new GLTFLoader();
       loader.load(
         'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
-        gltf => {
+        function (gltf) {
           scene.add(gltf.scene);
-
-          // Suche nach Objekt mit Namen "Customer"
-          customerPart = gltf.scene.getObjectByName('Customer');
-
-          if (customerPart) {
-            originalY = customerPart.position.y;
-            console.log('Customer-Objekt gefunden:', customerPart);
-          } else {
-            console.warn('Customer-Objekt NICHT gefunden.');
-          }
+          animate(); // Starte erst wenn Modell geladen ist
         },
         undefined,
-        error => {
+        function (error) {
           console.error('Fehler beim Laden des Modells:', error);
         }
       );
-
-      // Hover-Erkennung
-      window.addEventListener('mousemove', event => {
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        raycaster.setFromCamera(pointer, camera);
-        if (customerPart) {
-          const intersects = raycaster.intersectObject(customerPart);
-          if (intersects.length > 0) {
-            customerPart.position.y = originalY - 0.1; // Absenken bei Hover
-          } else {
-            customerPart.position.y = originalY; // Rücksetzen
-          }
-        }
-      });
-
-      // Klick öffnet URL
-      window.addEventListener('click', () => {
-        raycaster.setFromCamera(pointer, camera);
-        if (customerPart) {
-          const intersects = raycaster.intersectObject(customerPart);
-          if (intersects.length > 0) {
-            window.open('https://digit360.odoo.com/customer', '_blank');
-          }
-        }
-      });
-
-      // Resizing
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
 
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
         renderer.render(scene, camera);
       }
-      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
     </script>
   </body>
 </html>
