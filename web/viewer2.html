@@ -1,68 +1,87 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Test Canvas GLB</title>
-    <style>
-      html, body {
-        margin: 0;
-        overflow: hidden;
-        background: #f8f8f8;
+<head>
+  <meta charset="UTF-8" />
+  <title>Canvas GLB Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #f8f8f8;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .error-message {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: red;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border: 1px solid red;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
+
+    const canvas = document.querySelector('#canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf0f0f0);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 2, 6);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7.5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+    const loader = new GLTFLoader();
+    loader.load(
+      'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
+      function (gltf) {
+        scene.add(gltf.scene);
+        animate(); // Startet erst, wenn Modell geladen
+        console.log('Modell geladen.');
+      },
+      undefined,
+      function (error) {
+        console.error('Fehler beim Laden des Modells:', error);
+        const msg = document.createElement('div');
+        msg.className = 'error-message';
+        msg.innerText = '❌ Fehler beim Laden des Modells.';
+        document.body.appendChild(msg);
       }
-      canvas {
-        display: block;
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id="canvas"></canvas>
-    <script type="module">
-      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
-      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
-      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
+    );
 
-      const canvas = document.querySelector('#canvas');
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf0f0f0);
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
 
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 2, 6);
-
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
-      const light = new THREE.DirectionalLight(0xffffff, 1);
-      light.position.set(5, 10, 7.5);
-      scene.add(light);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-      const loader = new GLTFLoader();
-      loader.load(
-        'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
-        function (gltf) {
-          scene.add(gltf.scene);
-          animate(); // Starte erst wenn Modell geladen ist
-        },
-        undefined,
-        function (error) {
-          console.error('Fehler beim Laden des Modells:', error);
-        }
-      );
-
-      function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-      }
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
