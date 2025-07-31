@@ -2,75 +2,37 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <title>Canvas Viewer</title>
+    <title>Model Viewer Test</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
-      html, body {
+      body {
         margin: 0;
-        overflow: hidden;
         background: #f8f8f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
       }
-      canvas {
-        display: block;
+      model-viewer {
+        width: 700px;
+        height: 550px;
       }
     </style>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
-
-    <script type="module">
-      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
-      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/GLTFLoader.js';
-      import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
-
-      const canvas = document.querySelector('#canvas');
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf0f0f0);
-
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 2, 6);
-
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
-      // Licht
-      const light = new THREE.DirectionalLight(0xffffff, 1);
-      light.position.set(5, 10, 7.5);
-      scene.add(light);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-      // Modell laden
-      const loader = new GLTFLoader();
-      loader.load(
-        'https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb',
-        gltf => {
-          scene.add(gltf.scene);
-        },
-        undefined,
-        error => {
-          console.error('Fehler beim Laden des Modells:', error);
-        }
-      );
-
-      // Animation
-      function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // Resizing
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    </script>
+    <model-viewer
+      src="https://claudiogisep.github.io/DIGIT360/web/20250731_Canvas_glb.glb"
+      alt="Canvas-Modell"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      exposure="1.5"
+      environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
+    >
+    </model-viewer>
   </body>
 </html>
+
 
 
 
